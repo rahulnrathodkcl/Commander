@@ -107,6 +107,9 @@ void TEMP::init()
 
 void TEMP::update()
 {
+	if(!eeprom1->machineOn)
+		tempAlarmRaised=false;
+
 	if(!sensorOn && gotQuery)
 		spi1->sendData(A_INVALIDTEMP);
 
@@ -122,7 +125,7 @@ void TEMP::update()
 			operateOnQuery();
 		else
 		{
-			if(checkTempLimitReached())
+			if(checkTempLimitReached() && eeprom1->machineOn)
 			{
 				operateOnEvent();
 			}
