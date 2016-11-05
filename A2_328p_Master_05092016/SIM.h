@@ -88,6 +88,7 @@ class SIM
     void sendCommand(char cmd,bool newline);
     void sendCommand(String cmd,bool newline);
 
+    bool isCSQ(String);
     bool sendBlockingATCommand(String);
     String readString();
     bool matchString(String, String);
