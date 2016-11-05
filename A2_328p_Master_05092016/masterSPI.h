@@ -17,6 +17,7 @@ class masterSPI
 	bool *securityEvent;
 
 	volatile bool engaged;
+	unsigned long engageTime;
 	volatile byte *answer;
 	volatile bool *dataReceived;
 	volatile byte receivedByte;

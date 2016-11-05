@@ -124,13 +124,13 @@ void masterSPI::sendByte(byte data)
 	digitalWrite(SS,HIGH);
 }
 
-
 bool masterSPI::queryState(byte query,byte *answer,bool *dataReceived)
 {
 	if(!engaged)
 	{
 		//acquiredDataFromSlave=false;
 		engaged=true;
+		engageTime=millis();
 		this->answer=answer;
 		*dataReceived=false;
 		this->dataReceived=dataReceived;
@@ -170,4 +170,6 @@ byte masterSPI::receiveByte()
 
 void masterSPI::update()
 {	
+	if(engaged && millis()-engageTime>3500)
+		engaged=false;
 }
