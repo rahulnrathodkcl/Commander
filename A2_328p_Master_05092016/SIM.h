@@ -100,7 +100,7 @@ class SIM
     void makeCall();
     void endCall();
     void acceptCall();
-    void sendSMS();
+    void sendSMS(String,bool);
     void operateDTMF(String str);
     void operateRing();
     bool playSoundElligible();

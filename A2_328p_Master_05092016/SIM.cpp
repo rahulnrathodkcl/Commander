@@ -82,9 +82,9 @@ void SIM::anotherConstructor(byte SLEEPPIN)
   actionType = 'N';
   makeResponse = false;
 
-  callCutWaitTime = 600;
+  callCutWaitTime = 580;
   nr = 0;
-  responseSetting = 'C';
+  responseSetting = 'A';
   currentStatus = 'N';
   currentCallStatus = 'N';
   //gotSettingTone = false;
@@ -212,14 +212,21 @@ void SIM::operateOnMsg(String str,bool admin=false)
         lastSettingByte=S_FORCESTART;
         send=true;
       }
-      /*else if(stringContains(str,"AT+CSQ",6,str.length()-1))
+      else if(stringContains(str,"AT+CSQ",6,str.length()-1))
       {
         sendCommand("AT+CSQ",true);
         unsigned long int temp=millis();
+        String str;
         while(millis()-temp>1500)
         { 
+          str=readString();
+          str.trim();
+          if(isCSQ(str))
+          {
+            sendSMS(str,true);
+          }
         }
-      }*/
+      }
       
       if(send)
       {
@@ -250,6 +257,12 @@ void SIM::operateOnMsg(String str,bool admin=false)
         }
       }
     }
+}
+
+bool SIM::isCSQ(String str)
+{
+  str.trim();
+  return(str.startsWith("+CSQ"));
 }
 
 void SIM::sendReadMsg(String str)
@@ -652,29 +665,35 @@ void SIM::acceptCall()
   playSound('M',true);
 }
 
-void SIM::sendSMS()
+void SIM::sendSMS(String msg="",bool predefMsg=false)
 {
   _SSerial->flush();
-  String responseString = "";
-  switch (actionType)
+  String responseString;
+
+  if(!predefMsg)
   {
-    case 'O':
-      responseString = "M OFF";
-      break;
-    case 'I':
-      responseString = "RPM HIGH";
-      break;
-    case 'D':
-      responseString = "RPM LOW";
-      break;
+    switch (actionType)
+    {
+      case 'O':
+        responseString = "M OFF";
+        break;
+      case 'I':
+        responseString = "RPM HIGH";
+        break;
+      case 'D':
+        responseString = "RPM LOW";
+        break;
+    }
   }
+  else
+    responseString=msg;
 
   //delay(350);
   #ifndef disable_debug
   _NSerial->println("SMS..");
   #endif
-  if (sendBlockingATCommand("AT+CMGF=1\r"))
-  {
+  //if (sendBlockingATCommand("AT+CMGF=1\r"))
+  //{
     String command;
     command="AT+CMGS=\"+91";
     if(eeprom1->numbersCount>0)
@@ -695,11 +714,11 @@ void SIM::sendSMS()
       #ifndef disable_debug
       _NSerial->println("SMS Done");
       #endif
-      sendCommand("AT+CMGF=0\r");
+      //sendCommand("AT+CMGF=0\r");
       //_SSerial->print("AT+CMGF=0\r"); //Normal Mode
     }
     //_SSerial->println("AT+CMGS=\"+917698439201\""); // recipient's mobile number, in international format
-  }
+  //}
   //_SSerial->println("AT+CMGF=1\r"); // AT command to send SMS message
   //_NSerial->println(response_chk_ret_str());
   //SIM.println("AT+CMGS=\"+91" + CurEPSettings.phones[0] + "\""); // recipient's mobile number, in international format
@@ -901,9 +920,9 @@ bool SIM::responseActionElligible()
 void SIM::makeResponseAction()
 {
   makeResponse = false;
-  if (immediateEvent ||  responseSetting == 'A' || responseSetting == 'C')
+  if ((immediateEvent && sendImmediateResponse) ||  responseSetting == 'A' || responseSetting == 'C')
     makeCall();
-  else if (responseSetting == 'S')
+  else// if (responseSetting == 'S')
     sendSMS();
 }
 
