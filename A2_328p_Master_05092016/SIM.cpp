@@ -909,7 +909,8 @@ void SIM::stopSound()
 
 bool SIM::callTimerExpire()
 {
-  return (callAccepted && ((millis() - callCutWait) >= (callCutWaitTime*100)));
+  return ((millis() - callCutWait) >= (callCutWaitTime*100));
+  //return (callAccepted && ((millis() - callCutWait) >= (callCutWaitTime*100)));
 }
 
 bool SIM::responseActionElligible()
@@ -1185,9 +1186,9 @@ void SIM::update()
         #ifndef disable_debug
         _NSerial->println("Call Accepted");
         #endif
+        callCutWait = millis();
         currentStatus = 'I';
         currentCallStatus = 'O';
-        callCutWait = millis();
         callAccepted = true;
         playSound(actionType,true);
       }
