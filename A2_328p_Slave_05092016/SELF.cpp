@@ -142,9 +142,9 @@ void SELF::IVR_RPM()
         reportEvent(EVENT_FORCESTARTED);
       }
 
-      if(tempRPM>(eeprom1->COMPRPM) && startCnt<20)
+      if(tempRPM>(eeprom1->COMPRPM) && startCnt<250)
         startCnt++;
-      else if(startCnt>=20)
+      else if(startCnt>=250)
       {
         didCompress=false;
         reportEvent(EVENT_STARTRPM);
@@ -161,7 +161,7 @@ void SELF::IVR_RPM()
     {
         if(tempRPM>(eeprom1->RPM))
         {
-          if(HRPMCnt<20)
+          if(HRPMCnt<250)
             HRPMCnt++;
           else
           {
@@ -289,10 +289,10 @@ void SELF::checkNoRPM()
     if (tempRPM != 0)
     {
       RPM = 0;
-      if(!didCompress)
-      {
-        reportEvent(EVENT_NORPM);        
-      }
+      //if(!didCompress)
+      //{
+      //  reportEvent(EVENT_NORPM);        
+      //}
       turnMachineOff();
     }
   }
