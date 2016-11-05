@@ -760,6 +760,15 @@ void SIM::operateDTMF(String str)
       if(starPresent && DTMFCommandPresent!=0)
       {
         byte temp = str.toInt();
+
+        if(temp==9)
+        {
+          starPresent=false;
+          DTMFCommandPresent=0;
+          playSound('M',true);
+          return;
+        }
+
         if(temp>5) 
           temp=5;
         else if(temp==0)
@@ -783,23 +792,30 @@ void SIM::operateDTMF(String str)
 
       if (str == "4") //"INC RPM"
       {
-          if(starPresent)
-               DTMFCommandPresent=4;
-          else
-          {
-            currentOperation='I';
-            f1(1);            
-          } 
+          starPresent=true;
+          DTMFCommandPresent=4; 
+          playSound('H',true);
+
+          // if(starPresent)
+          //      DTMFCommandPresent=4;
+          // else
+          // {
+          //   currentOperation='I';
+          //   f1(1);            
+          // } 
       }
       else if (str == "3") //DEC RPM
       {
-          if(starPresent)
-              DTMFCommandPresent=3;
-          else
-          {
-            currentOperation='D';
-            f2(1);            
-          }
+          starPresent=true;
+          DTMFCommandPresent=3;
+          playSound('G',true);
+          // if(starPresent)
+              // DTMFCommandPresent=3;
+          // else
+          // {
+            // currentOperation='D';
+            // f2(1);            
+          // }
       }
       else if (str == "1") //MACHINE OFF
       {
@@ -810,11 +826,6 @@ void SIM::operateDTMF(String str)
       {
           currentOperation='S';
           f4(true);
-      }
-      else if(str=="*")
-      {
-        DTMFCommandPresent=0; 
-        starPresent=true;
       }
   }
 }
@@ -870,6 +881,9 @@ void SIM::playSoundAgain(String str)
   
   if(immediateEvent && sendImmediateResponse)
     noOfTimeSoundPlays*=2;
+  else if(starPresent)
+    noOfTimeSoundPlays*=3;
+
 
   if (isSoundStop(str))
   {
@@ -881,6 +895,18 @@ void SIM::playSoundAgain(String str)
             playFile='A';
           else
             playFile=actionType;
+      }
+      else if (starPresent)
+      {
+        if (playFile=='G' || playFile=='H')
+          playFile='E';
+        else if(playFile=='E')
+          playFile='N';
+        else if(playFile=='N')
+        {
+            if(DTMFCommandPresent==3) playFile='G';
+            else if(DTMFCommandPresent==4) playFile='H';          
+        }
       }
       playSound(playFile);
     }
