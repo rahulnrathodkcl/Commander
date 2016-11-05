@@ -1,6 +1,7 @@
 #ifndef DEF_h
 #define DEF_h
 
+#define CHK_BATTERY
 // SELF
 
 #define LIMITREADINGTIME 25
