@@ -737,7 +737,6 @@ void SIM::operateDTMF(String str)
       #endif
       _SSerial->flush();
       sendCommand("AT+CHUP",true);
-      //_SSerial->println("AT+CHUP");
       _SSerial->flush();
       sendImmediateFeedback(true);
       endCall();
@@ -749,7 +748,6 @@ void SIM::operateDTMF(String str)
       #endif
       _SSerial->flush();
       sendCommand("AT+CHUP",true);
-      //_SSerial->println("AT+CHUP");
       _SSerial->flush();
       sendImmediateFeedback(false);
       endCall();
@@ -765,26 +763,29 @@ void SIM::operateDTMF(String str)
         {
           starPresent=false;
           DTMFCommandPresent=0;
+          callCutWait=millis();
           playSound('M',true);
           return;
         }
 
         if(temp>5) 
           temp=5;
-        else if(temp==0)
-        {
-          endCall();
-          return;
-        } 
+        // else if(temp==0)
+        // {
+          // endCall();
+          // return;
+        // } 
 
         if(DTMFCommandPresent==4)
         {
           currentOperation='I';
+          callCutWait=millis();
           f1(temp);
         }
         else if (DTMFCommandPresent==3)
         {
           currentOperation='D';
+          callCutWait=millis();
           f2(temp);
         }
         return;
@@ -794,37 +795,32 @@ void SIM::operateDTMF(String str)
       {
           starPresent=true;
           DTMFCommandPresent=4; 
+          callCutWait=millis();
           playSound('H',true);
-
-          // if(starPresent)
-          //      DTMFCommandPresent=4;
-          // else
-          // {
-          //   currentOperation='I';
-          //   f1(1);            
-          // } 
       }
       else if (str == "3") //DEC RPM
       {
           starPresent=true;
           DTMFCommandPresent=3;
+          callCutWait=millis();
           playSound('G',true);
-          // if(starPresent)
-              // DTMFCommandPresent=3;
-          // else
-          // {
-            // currentOperation='D';
-            // f2(1);            
-          // }
       }
       else if (str == "1") //MACHINE OFF
       {
           currentOperation='O';
+          starPresent=true;
+          DTMFCommandPresent=1;
+          callCutWait=millis();
+          stopSound();
           f3(true);
       }
       else if (str == "2") //MACHINE START
       {
           currentOperation='S';
+          starPresent=true;
+          DTMFCommandPresent=2;
+          callCutWait=millis();
+          stopSound();
           f4(true);
       }
   }
@@ -884,8 +880,12 @@ void SIM::playSoundAgain(String str)
   if(immediateEvent && sendImmediateResponse)
     noOfTimeSoundPlays*=2;
   else if(starPresent)
-    noOfTimeSoundPlays*=3;
-
+  {
+    if(DTMFCommandPresent>2)
+      noOfTimeSoundPlays*=3;
+    else
+      noOfTimeSoundPlays*=2;
+  }
 
   if (isSoundStop(str))
   {
@@ -900,14 +900,24 @@ void SIM::playSoundAgain(String str)
       }
       else if (starPresent)
       {
-        if (playFile=='G' || playFile=='H')
-          playFile='E';
-        else if(playFile=='E')
-          playFile='N';
-        else if(playFile=='N')
+        if (DTMFCommandPresent>2)
         {
-            if(DTMFCommandPresent==3) playFile='G';
-            else if(DTMFCommandPresent==4) playFile='H';          
+          if (playFile=='G' || playFile=='H')
+            playFile='E';
+          else if(playFile=='E')
+            playFile='N';
+          else if(playFile=='N')
+          {
+              if(DTMFCommandPresent==3) playFile='G';
+              else if(DTMFCommandPresent==4) playFile='H';          
+          }
+        }
+        else
+        {
+          if(playFile==actionType)
+            playFile='N';
+          else
+            playFile=actionType;
         }
       }
       playSound(playFile);
@@ -924,6 +934,7 @@ void SIM::playSound(char actionType,bool init)
   _SSerial->flush();
   soundWait = millis();
   bplaySound = true;
+  this->actionType=actionType;
   playFile = actionType;
     if(init)
       soundPlayedNumber=0;
@@ -931,8 +942,9 @@ void SIM::playSound(char actionType,bool init)
 
 void SIM::stopSound()
 {
-  //_SSerial->flush();
-  //sendCommand("AT+CPAMR\r",true);
+  _SSerial->flush();
+  sendCommand("AT+CPAMR\r",true);
+  _SSerial->flush();
 }
 
 bool SIM::callTimerExpire()
@@ -1175,7 +1187,7 @@ void SIM::update()
       {
         currentStatus = 'R';
         currentCallStatus = 'I';
-        operateRing();
+        operateRing(); 
       }
     }
     else if (!freezeIncomingCalls && currentStatus == 'I' && currentCallStatus == 'I') //IN CALL INCOMING CALL
