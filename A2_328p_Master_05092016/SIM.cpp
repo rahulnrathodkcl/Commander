@@ -187,7 +187,7 @@ void SIM::operateOnMsg(String str,bool admin=false)
             send=true;
           }
       }      
-      else if(stringContains(str,"RPM",3,str.length()-1))
+      else if(stringContains(str,"HRPM",3,str.length()-1))
       {
           if(isNumeric(str))
           {
