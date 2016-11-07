@@ -836,6 +836,9 @@ void SIM::operateRing()
   if (nr <= 2)
   {
 
+    if(nr==1)
+      sendCommand("AT+DDET=1\r\n");
+    
     String str;
     do
     {
@@ -854,7 +857,6 @@ void SIM::operateRing()
   else if(nr==3)
   {
       callCutWait = millis();
-      sendCommand("AT+DDET=1\r\n");
       acceptCall();     
   }
 }
