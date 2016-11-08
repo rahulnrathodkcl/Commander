@@ -881,10 +881,13 @@ void SIM::playSoundAgain(String str)
     noOfTimeSoundPlays*=2;
   else if(starPresent)
   {
-    if(DTMFCommandPresent>2)
-      noOfTimeSoundPlays*=3;
+    if(!responseToAction)
+    {
+      if(DTMFCommandPresent>2)
+        noOfTimeSoundPlays*=3;
+    }
     else
-      noOfTimeSoundPlays*=2;
+        noOfTimeSoundPlays*=2;   
   }
 
   if (isSoundStop(str))
@@ -897,19 +900,21 @@ void SIM::playSoundAgain(String str)
             playFile='A';
           else
             playFile=actionType;
-      }
       else if (starPresent)
       {
-        if (DTMFCommandPresent>2)
+        if(!responseToAction)
         {
-          if (playFile=='G' || playFile=='H')
-            playFile='E';
-          else if(playFile=='E')
-            playFile='N';
-          else if(playFile=='N')
+          if (DTMFCommandPresent>2)
           {
-              if(DTMFCommandPresent==3) playFile='G';
-              else if(DTMFCommandPresent==4) playFile='H';          
+            if (playFile=='G' || playFile=='H')
+              playFile='E';
+            else if(playFile=='E')
+              playFile='N';
+            else if(playFile=='N')
+            {
+                if(DTMFCommandPresent==3) playFile='G';
+                else if(DTMFCommandPresent==4) playFile='H';          
+            }
           }
         }
         else
@@ -1063,6 +1068,7 @@ void SIM::operateOnMotorResponse()
   checkMotorStatus=false;
   if(currentOperation=='I')  //increase
   {
+    responseToAction=true;
     if(motorStatus=='L')
       playSound('3',true);
     else if(motorStatus=='O')
@@ -1072,6 +1078,7 @@ void SIM::operateOnMotorResponse()
   }
   else if(currentOperation=='D' || currentOperation=='O') //decrease or switch off
   {
+    responseToAction=true;
     if(motorStatus=='L')
       playSound('4',true);
     else if(motorStatus=='O')
@@ -1086,6 +1093,7 @@ void SIM::operateOnSelfResponse()
   checkSelfStatus=false;
   if(currentOperation=='S')
   {
+    responseToAction=true;
     if(selfStatus=='L')
       playSound('B',true);
     else if(selfStatus=='O')

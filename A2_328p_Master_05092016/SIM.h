@@ -18,6 +18,7 @@ class SIM
     byte lastSettingByte;
     bool sendAgain;
 
+    bool responseToAction;
     String adminNumber;
     byte soundPlayNumber;
     byte soundWaitTime; //x100 = mSec
