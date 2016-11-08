@@ -81,6 +81,7 @@ void SIM::anotherConstructor(byte SLEEPPIN)
 
   actionType = 'N';
   makeResponse = false;
+  responseToAction=false;
 
   callCutWaitTime = 580;
   nr = 0;
@@ -630,6 +631,7 @@ void SIM::endCall()
   //gotSettingTone = false;
   soundPlayedNumber = 0;
   callAccepted = false;
+  responseToAction=false;
   currentStatus = 'N';
   currentCallStatus = 'N';
   
@@ -900,6 +902,7 @@ void SIM::playSoundAgain(String str)
             playFile='A';
           else
             playFile=actionType;
+      }
       else if (starPresent)
       {
         if(!responseToAction)
