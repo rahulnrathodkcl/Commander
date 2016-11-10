@@ -213,6 +213,10 @@ void SIM::operateOnMsg(String str,bool admin=false)
         lastSettingByte=S_FORCESTART;
         send=true;
       }
+      else if(stringContains(str,"RPM?",4,str.length()-1))
+      {
+        triggerASKRPM=true;
+      }
       else if(stringContains(str,"AT+CSQ",6,str.length()-1))
       {
         sendCommand("AT+CSQ",true);
@@ -1125,8 +1129,23 @@ void SIM::sendSettingsAgain()
   sendAgain=!spi1->sendSettings(lastSettingByte,data);
 }
 
+void SIM::operateOnRPMSensorData()
+{
+  rpmSensorDataReceived=false;
+  String str="RPM:";
+  String str2=String(rpmSensorData);
+  str.concat(str2);
+  sendSMS(str,true);
+}
+
 void SIM::update()
 {
+  if(triggerASKRPM)
+    triggerASKRPM=!spi1->askSensorData((byte)ASK_RPM,&rpmSensorData,&rpmSensorDataReceived);
+
+  if(rpmSensorDataReceived)
+    operateOnRPMSensorData();
+
   if(sendAgain)
       sendSettingsAgain();
 

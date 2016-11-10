@@ -52,19 +52,55 @@ template <typename T> unsigned int masterSPI::SPI_writeAnything (const T& value)
     for (i = 0; i < sizeof value; i++)
           SPI.transfer(*p++);
     return i;
- }  // end of SPI_writeAnything
+}  // end of SPI_writeAnything
 
+bool masterSPI::askSensorData(byte askByte,unsigned short int* sensorData,bool *sensorDataReceived)
+{
+	if(!engaged)
+	{
+		this->sensorData=sensorData;
+		this->sensorDataReceived=sensorDataReceived;
+		*sensorData=0;
+		*sensorDataReceived=false;
+		gotSensorData=false;
+		sensorDataIndex=0;
+		askedSensorData=true;
+		
+		#ifndef disable_debug
+			_Serial->print("A:");
+			_Serial->println(askByte);
+		#endif
+			engaged=true;
+		sendByte(askByte);
+		return true;
+	}
+	return false;
+}
 
 void masterSPI::ISR_SlaveReady()
 {
 		receiveByte();
-		byte temp;
-		temp=receivedByte>>4;
-		
+
 		#ifndef disable_debug
 			_Serial->print("RB:");
 			_Serial->println(receivedByte);
 		#endif
+
+		if(askedSensorData)
+		{
+			sensorDataByte[sensorDataIndex++]=receivedByte;
+			if(sensorDataIndex==2)
+			{
+				engaged=false;
+				askedSensorData=false;
+				gotSensorData=true;
+			}
+			return;
+		}
+
+		byte temp;
+		temp=receivedByte>>4;
+		
 
 		if(engaged && temp==CHKINCOMING_ANSWER)
 		{	
@@ -168,8 +204,29 @@ byte masterSPI::receiveByte()
 	return 0x00;
 }
 
+void masterSPI::operateOnSensorData()
+{
+	gotSensorData=false;
+	
+	*sensorData=sensorDataByte[1];
+	*sensorData=(*sensorData)<<8;
+	*sensorData= (*sensorData) | sensorDataByte[0];
+	*sensorDataReceived=true;
+
+	sensorDataByte[0]=0;
+	sensorDataByte[1]=0;
+	sensorDataIndex=0;
+}
+
 void masterSPI::update()
 {	
 	if(engaged && millis()-engageTime>3500)
+	{
 		engaged=false;
+		askedSensorData=false;
+		gotSensorData=false;
+	}
+
+	if(gotSensorData)
+		operateOnSensorData();
 }

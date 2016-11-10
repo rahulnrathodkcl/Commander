@@ -62,8 +62,11 @@ class SIM
 
     bool obtainNewEvent;
     unsigned long obtainEventTimer;
-    //#ifdef use_mega
-    //#endif
+
+    bool triggerASKRPM;
+    unsigned short int rpmSensorData;
+    bool rpmSensorDataReceived;
+
     void (*f1)(byte);
     void (*f2)(byte);
     void (*f3)(bool);
@@ -120,6 +123,7 @@ class SIM
 
     void operateOnMotorResponse();
     void operateOnSelfResponse();
+    void operateOnRPMSensorData();
 
     void sendSettingsAgain();
     void setObtainEvent();
@@ -165,12 +169,7 @@ class SIM
 
     void clearBRead();
     void bRead();
-    //#ifdef use_mega
     void setDTMFFunctions(void (*p1)(byte),void (*p2)(byte),void (*p3)(bool),void (*p4)(bool));
-    //#else
-    //    void setDTMFFunctions(void (*p1)(),void (*p2)(),void (*p3)());
-    //#endif
-
     void setCallBackFunctions(void (*ImdEvent)(bool));
 
     void speedMotorStatus(char status);

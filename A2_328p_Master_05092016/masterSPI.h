@@ -21,9 +21,17 @@ class masterSPI
 	volatile byte *answer;
 	volatile bool *dataReceived;
 	volatile byte receivedByte;
+	
+	volatile bool gotSensorData;
+	volatile bool askedSensorData;
+	volatile byte sensorDataByte[2];
+	volatile byte sensorDataIndex; 
+	unsigned short int *sensorData;
+	bool *sensorDataReceived;
 
 	void sendByte(byte data);
 	byte receiveByte();
+	void operateOnSensorData();
 
 	#ifndef disable_debug
 		#ifdef software_SIM
@@ -50,6 +58,7 @@ class masterSPI
 		
 		bool sendSettings(byte,float);
 		bool queryState(byte ,byte *,bool *);
+		bool askSensorData(byte,unsigned short int*,bool *);
 		bool inform(byte);
 		void update();
 };

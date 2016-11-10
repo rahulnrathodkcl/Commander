@@ -51,6 +51,10 @@
 	#define S_MOTORRLOW 0x75
 	#define S_FORCESTART 0x76
 
+	//Receive Data From Slave in (unsigned short int (2 bytes))
+	#define ASK_RPM 0x20
+	#define ASK_TEMP 0x21
+
 	#define Q_TEMP 0x60
 	#define Q_LIMIT 0x61
 	#define Q_MOTOR 0x62
@@ -77,7 +81,6 @@
 	#define A_SLAVEEXISTS 0x9E
 	#define A_BATTERYOK 0x9F
 	#define A_BATTERYLOW 0x80
-
 	
 	#define I_SELFSTARTED 0x30
 	#define I_SELFSTOPPED 0x31
