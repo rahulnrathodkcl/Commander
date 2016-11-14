@@ -27,6 +27,9 @@ class SELF
 	byte compSwitchChangedOffTime;
 	byte decompSwitchChangedOffTime;
 
+	byte reportEventByte;
+	bool waitForReporting;
+
 	bool compressing;
   	bool decompressing;
   	bool reportedCOMPRPM;

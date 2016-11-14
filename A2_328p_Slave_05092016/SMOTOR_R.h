@@ -15,6 +15,9 @@ class SMOTOR_R
 	bool operating;
 	bool gotQuery;
 	unsigned short int lastMotorPos;
+	
+	byte reportEventByte;
+	bool waitForReporting;
 
 	bool reportedMotorHigh;
 	bool reportedMotorLow;

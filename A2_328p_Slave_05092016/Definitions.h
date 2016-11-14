@@ -41,6 +41,9 @@
 #define EEPROM_MIN_ADDR 0
 #define EEPROM_MAX_ADDR 1023
 
+	//Receive Data From Slave in (unsigned short int (2 bytes))
+	#define ASK_RPM 0x20
+	#define ASK_TEMP 0x21
 
 	#define S_COMPRPM 0x70
 	#define S_DECOMPRPM 0x71

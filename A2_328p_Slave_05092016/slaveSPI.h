@@ -23,6 +23,15 @@ class slaveSPI
 	TEMP* temp1;
 	S_EEPROM *eeprom1;
 	
+	bool sendingSensorData;
+	bool gotSensorDataTrigger;
+	bool lastByte;
+	bool sendAnotherSensorDataByte;
+	unsigned long tempWaitTime;
+	byte waitTime;
+	byte sensorData[2];
+	byte sensorDataIndex;
+
 	#ifdef CHK_BATTERY
 		BATTERY* batteryLevel;
 	#endif
@@ -51,7 +60,9 @@ class slaveSPI
 	template <typename T> unsigned int SPI_readAnything(T& value);	
 	void operateOnSPIData();
 	void operateOnSetting();
+	void operateOnSensorDataRequest();
 
+	void sendSensorData();
 public:
 
 	slaveSPI(void (*startSequenceQuery)(),S_EEPROM *eeprom1);
@@ -64,7 +75,7 @@ public:
 	// void setInformFunction(void(*iSelf)(byte),void (*iLimit)(byte),void (*ismotor)(byte));
 	// void setQueryFunction(void(*startSeq)(),void(*Temp)(),void (*smotor)(),void(*selfLimit)(),void (*selfMachine)());
 	void receiveInterrupt();
-	void sendData(byte);
+	bool sendData(byte);
 	void update();
 };
 #endif

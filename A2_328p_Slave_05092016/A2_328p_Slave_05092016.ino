@@ -314,15 +314,16 @@ void loop() {
     {
       if(!securityAlarmed)
       { 
-        if(securityCnt<3)
+        if(securityCnt<2)
         {
             securityCnt++;
         }
         else
         {
-          spi1.sendData(EVENT_SECURITY);
-          securityCnt=0;
-          securityAlarmed=true;
+          securityAlarmed=spi1.sendData(EVENT_SECURITY);
+          if(securityAlarmed)
+            securityCnt=0;
+          //securityAlarmed=true;
         }
       }
     }

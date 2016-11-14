@@ -15,6 +15,7 @@ class TEMP
 
 	bool gotQuery;
 	bool tempAlarmRaised;
+	bool triggerAlarm;
 
 	unsigned long wait;
 	unsigned long getTempWait;

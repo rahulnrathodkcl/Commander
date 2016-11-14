@@ -13,6 +13,10 @@ slaveSPI::slaveSPI(void (*startSequenceQuery)(),S_EEPROM *eeprom1)
 	SPCR |= bit (SPE);	//enable SPI slave mode
   	pinMode(MISO, OUTPUT);
 
+	sendingSensorData=false;
+
+	waitTime=3;
+
 	PCICR |= (1 <<PCIE0);
 	PCMSK0 |= (1<<PCINT2);
 	SPI.attachInterrupt();
@@ -66,6 +70,13 @@ void slaveSPI::receiveInterrupt()
 	if(temp==Q_EVENT)
 	{
 		digitalWrite(PIN_INTERRUPTMASTER,LOW);
+		if(sendingSensorData)
+		{
+			if(!lastByte)
+				gotSensorDataTrigger=true;
+			else
+				sendingSensorData=false;
+		}
 		// _Serial->println("Querying For Data");
 		// _Serial->println(SPDR);	
 		return;
@@ -76,7 +87,6 @@ void slaveSPI::receiveInterrupt()
 	if(temp2==CHKINCOMING_SETTING)
 	{
 		SPI_readAnything(settingData);
-
 		settingByte=temp;
 		settingReceived=true;
 	}
@@ -90,14 +100,17 @@ void slaveSPI::receiveInterrupt()
 
 void slaveSPI::operateOnSPIData()
 {
-
 	// _Serial->print("Data Received:");
 	// _Serial->println(spiData);
-
 	spiDataReceived=false;
 	byte temp=spiData >> 4;
 	switch(temp)
 	{
+		case ASK_RPM:
+		case ASK_TEMP:
+			operateOnSensorDataRequest();
+			return;
+		break;
 		case CHKINCOMING_QUERY:	//query
 			switch(spiData)
 			{
@@ -171,10 +184,40 @@ void slaveSPI::operateOnSetting()
 	}
 }
 
-void slaveSPI::sendData(byte data)
+bool slaveSPI::sendData(byte data)
 {
-	SPDR=data;
-	digitalWrite(PIN_INTERRUPTMASTER,HIGH);
+	if(!sendingSensorData)
+	{
+		SPDR=data;
+		digitalWrite(PIN_INTERRUPTMASTER,HIGH);
+		return true;
+	}
+	return false;
+}
+
+void slaveSPI::operateOnSensorDataRequest()
+{
+	sensorDataIndex=0;
+	lastByte=false;
+	gotSensorDataTrigger=false;
+	sendAnotherSensorDataByte=false;
+
+	sendingSensorData=true;	
+	if(spiData==ASK_RPM)
+	{
+		unsigned short int temp=self1->getRPM();
+		sensorData[0]=temp;
+		sensorData[1]=temp>>8;
+		sendSensorData();
+	}
+}
+
+void slaveSPI::sendSensorData()
+{
+	SPDR=sensorData[sensorDataIndex++];
+	if(sensorDataIndex>1)
+		lastByte=true;
+	digitalWrite(PIN_INTERRUPTMASTER,HIGH);	
 }
 
 void slaveSPI::update()
@@ -192,8 +235,19 @@ void slaveSPI::update()
 	if(settingReceived)
 		operateOnSetting();
 
+	if(sendingSensorData)
+	{
+		if(gotSensorDataTrigger)
+		{
+			gotSensorDataTrigger=false;
+			sendAnotherSensorDataByte=true;
+			tempWaitTime=millis();
+		}
+	
+		if(sendAnotherSensorDataByte && millis()-tempWaitTime>waitTime)
+		{
+			sendAnotherSensorDataByte=false;
+			sendSensorData();
+		}
+	}
 }
-//void slaveSPI::answerQuery(byte data)
-//{
-//	sendData(data);
-//}

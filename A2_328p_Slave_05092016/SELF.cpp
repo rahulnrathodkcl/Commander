@@ -118,7 +118,8 @@ void SELF::informLimit(byte spiData)
 
 void SELF::reportEvent(byte event)
 {
-    spi1->sendData(event);
+  reportEventByte=event;
+  waitForReporting=!(spi1->sendData(reportEventByte));
 }
 
 void SELF::IVR_RPM()
@@ -206,38 +207,10 @@ void SELF::IVR_SDECOMPRESS()
   //}
 }
 
-
 bool SELF::isDecompressed()
 {
   return (!digitalRead(PIN_DECOMP));
 }
-
-//bool SELF::stopMotorElligible()
-//{
-//  if(compressing)
-//  {
-//    return(operating && (millis()-operateTime>(operateWaitTime*100) || (switchChanged && millis()-tempSwitchTime>(compSwitchChangedOffTime*100))));
-//  }
-//  else 
-//  {
-//    return(operating && (millis()-operateTime>(operateWaitTime*100) || (switchChanged && millis()-tempSwitchTime>(decompSwitchChangedOffTime*100))));
-//  }
-//}
-//
-//void SELF::stopMotor()
-//{
-//  operating=false;
-//  //digitalWrite(REL_COMPRESS,HIGH);
-//  //digitalWrite(REL_DECOMPRESS,HIGH);
-//
-//  compressing=false;
-//  decompressing=false;
-//  switchChanged=false;
-//
-//  turnSignalOff();
-//
-//  Serial.println("Motor Off....");
-//}
 
 void SELF::compress()
 {
@@ -291,7 +264,7 @@ void SELF::checkNoRPM()
       RPM = 0;
       //if(!didCompress)
       //{
-      //  reportEvent(EVENT_NORPM);        
+      reportEvent(EVENT_NORPM);        
       //}
       turnMachineOff();
     }
@@ -323,31 +296,6 @@ void SELF::setMachineStatus()
     }
 }
 
-//bool SELF::setMachineStatus()
-//{
-//  double tempRPM;
-//  tempRPM = RPM;
-//
-//  if(!selfOn)
-//  {
-//    turnSignalOn();
-//    while(millis()-tempSignalTime<50)
-//    {}
-//    if (tempRPM > (eeprom1->DECOMPRPM) && !isDecompressed())
-//    {
-//      turnSignalOff();
-//      turnMachineOn();
-//      return true;
-//    }
-//    else if (tempRPM > 0 && tempRPM < (eeprom1->DECOMPRPM) && isDecompressed())
-//    {
-//      turnSignalOff();
-//      turnMachineOff();
-//      return false;
-//    }
-//  }
-//}
-
 double SELF::getRPM()
 {
   double tempRPM;
@@ -378,11 +326,6 @@ bool SELF::getMachineStatus()
 {
   return machineOn;
 }
-
-//bool SELF::limitSwitchReadingElligible()
-//{
-//  return (signalOn && limitSwitchOperated && millis()-limitSwitchOperatedAt>(limitSwitchWaitTime));
-//}
 
 void SELF::turnSignalOn()
 { 
@@ -451,6 +394,9 @@ bool SELF::stopSignalElligible()
 
 void SELF::update()
 {
+  if(waitForReporting)
+    waitForReporting=!(spi1->sendData(reportEventByte));
+
   if (gotTrigger)
   {
     IVR_RPM();

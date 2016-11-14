@@ -34,7 +34,8 @@ void SMOTOR_R::operateOnQuery()
 
 void SMOTOR_R::reportEvent(byte eventByte)
 {
-	spi1->sendData(eventByte);
+	reportEventByte=eventByte;
+	waitForReporting=!(spi1->sendData(reportEventByte));
 }
 
 void SMOTOR_R::inform(byte information)
@@ -154,6 +155,9 @@ byte SMOTOR_R::checkLimit()
 
 void SMOTOR_R::update()
 {		
+	if(waitForReporting)
+		waitForReporting=!(spi1->sendData(reportEventByte));
+
 	if(operating || backingOff)
 		checkEvent();
 	if(gotQuery)

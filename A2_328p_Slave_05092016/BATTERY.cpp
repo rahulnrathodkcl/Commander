@@ -78,18 +78,12 @@ void BATTERY::checkInitialBatteryLevel()
 	checkBatteryLevel();
 }
 
-void BATTERY::reportEvent(byte eventByte)
-{
-	spi1->sendData(eventByte);
-}
-
 void BATTERY::checkBatteryLevel()
 {
 	batteryLevel=getBatteryLevel();
 	if(!checkSufficientLevel() && !alarmed)
 	{
-			reportEvent(EVENT_BATTERYLOW);
-			alarmed=true;
+			alarmTrigger=true;
 	}
 }
 
@@ -100,4 +94,13 @@ void BATTERY::update()
 
 	if(millis()-lastCheck>180000L && !selfOn)
 		checkBatteryLevel();
+
+	if(alarmTrigger)
+	{
+		if(spi1->sendData(EVENT_BATTERYLOW))
+		{
+			alarmed=true;
+			alarmTrigger=false;
+		}
+	}
 }

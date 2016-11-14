@@ -12,11 +12,11 @@ class BATTERY
 	bool alarmed;
 	bool gotQuery;
 	bool selfOn;
+	bool alarmTrigger;
 
 	void operateOnQuery();
 	bool checkSufficientLevel();
 	byte getBatteryLevel();
-	void reportEvent(byte);
 	void checkBatteryLevel();
 
 	public:

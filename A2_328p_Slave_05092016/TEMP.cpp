@@ -94,8 +94,7 @@ void TEMP::operateOnEvent()
 {
 	if(!tempAlarmRaised)
 	{
-		tempAlarmRaised=true;
-		spi1->sendData(EVENT_HIGHTEMP);
+		triggerAlarm=true;
 	}
 }
 
@@ -107,6 +106,15 @@ void TEMP::init()
 
 void TEMP::update()
 {
+	if(triggerAlarm)
+	{
+		if(spi1->sendData(EVENT_HIGHTEMP))
+		{
+			tempAlarmRaised=true;
+			triggerAlarm=false;
+		}
+	}
+
 	if(!eeprom1->machineOn)
 		tempAlarmRaised=false;
 
