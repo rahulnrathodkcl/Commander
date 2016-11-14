@@ -16,6 +16,8 @@ slaveSPI::slaveSPI(void (*startSequenceQuery)(),S_EEPROM *eeprom1)
 	sendingSensorData=false;
 
 	waitTime=3;
+	sensorDataRequestWaitTime=10;
+
 
 	PCICR |= (1 <<PCIE0);
 	PCMSK0 |= (1<<PCINT2);
@@ -202,6 +204,7 @@ void slaveSPI::operateOnSensorDataRequest()
 	gotSensorDataTrigger=false;
 	sendAnotherSensorDataByte=false;
 
+	sensorDataRequestTime=millis();
 	sendingSensorData=true;	
 	if(spiData==ASK_RPM)
 	{
@@ -235,8 +238,15 @@ void slaveSPI::update()
 	if(settingReceived)
 		operateOnSetting();
 
+
 	if(sendingSensorData)
 	{
+		if(millis()-sensorDataRequestTime>sensorDataRequestWaitTime)
+		{
+			sendingSensorData=false;
+			return;
+		}
+		
 		if(gotSensorDataTrigger)
 		{
 			gotSensorDataTrigger=false;

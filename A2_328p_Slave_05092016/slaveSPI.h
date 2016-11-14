@@ -32,6 +32,9 @@ class slaveSPI
 	byte sensorData[2];
 	byte sensorDataIndex;
 
+	unsigned long sensorDataRequestTime;
+	byte sensorDataRequestWaitTime;
+
 	#ifdef CHK_BATTERY
 		BATTERY* batteryLevel;
 	#endif
