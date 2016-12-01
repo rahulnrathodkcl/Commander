@@ -33,6 +33,9 @@
 #define mobileNumberAddress 8
 
 #define forceStartAddress 102
+#define alterNumberPresentAddress 106
+#define alterNumberSettingAddress 110
+#define alterNumberAddress 114
 
 #define EEPROM_MIN_ADDR 0
 #define EEPROM_MAX_ADDR 1023

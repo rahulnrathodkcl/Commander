@@ -102,6 +102,7 @@ class SIM
     bool isCut(String);
     bool isSoundStop(String);
     char callState(String);
+    String getActiveNumber();
     void makeCall();
     void endCall();
     void acceptCall();

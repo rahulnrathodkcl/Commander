@@ -243,7 +243,7 @@ void SIM::operateOnMsg(String str,bool admin=false)
       {
         if(str.length()==10 && isNumeric(str))
         {
-          bool t=eeprom1->removeNumber(str,admin);
+          bool t=eeprom1->removeNumber(str);
           #ifndef disable_debug
             _NSerial->print("Remove:");
             _NSerial->println((bool)t);
@@ -254,8 +254,29 @@ void SIM::operateOnMsg(String str,bool admin=false)
       {
         if (str.length() == 10 && isNumeric(str))
         {
-          bool t=eeprom1->addNumber(str, true);
+          bool t=eeprom1->addNumber(str);
           #ifndef disable_debug
+            _NSerial->print("Add:");
+            _NSerial->println((bool)t);
+          #endif
+        }
+      }
+      else if(stringContains(str,"AMON",4,str.length()-1))
+      {
+        if(eeprom1->alterNumberPresent)
+          eeprom1->saveAlterNumberSetting(true);
+      }
+      else if(stringContains(str,"AMOFF",5,str.length()-1))
+      {
+        eeprom1->saveAlterNumberSetting(false);
+      }
+      else if (stringContains(str,"AM+",3,13))
+      {
+        if (str.length() == 10 && isNumeric(str))
+        {
+          bool t=eeprom1->addAlternateNumber(str);
+          #ifndef disable_debug
+            _NSerial->print("Alter ");
             _NSerial->print("Add:");
             _NSerial->println((bool)t);
           #endif
@@ -297,6 +318,8 @@ bool SIM::isPrimaryNumber(String str)
   {
     if(eeprom1->primaryNumber==str)
       return true; 
+    if (eeprom1->alterNumberSetting && eeprom1->alterNumber==str)
+      return true;
   }
   return false;
 }
@@ -590,6 +613,19 @@ char SIM::callState(String str)
   }
 }
 
+String SIM::getActiveNumber()
+{
+    if(eeprom1->numbersCount>0)
+    {
+      if(!eeprom1->alterNumberSetting)
+        return(eeprom1->primaryNumber);
+      else
+        return(eeprom1->alterNumber);
+    }
+    else
+     return(adminNumber);//="AT+CMGS=\"+917698439201\"";  
+}
+
 void SIM::makeCall()
 {
   acceptCommands();
@@ -599,13 +635,10 @@ void SIM::makeCall()
     //sendBlockingATCommand("ATD+917698439201;");
     String command;
     command="ATD+91";
-    if(eeprom1->numbersCount>0)
-      command.concat(eeprom1->primaryNumber);
-    else
-      command.concat(adminNumber);//="AT+CMGS=\"+917698439201\"";
-
+    command.concat(getActiveNumber());
     command.concat(";");
     sendCommand(command,true);
+
     double temp=millis();
     while(millis()-temp<100)
     {    }
@@ -702,14 +735,9 @@ void SIM::sendSMS(String msg="",bool predefMsg=false)
   //{
     String command;
     command="AT+CMGS=\"+91";
-    if(eeprom1->numbersCount>0)
-      command.concat(eeprom1->primaryNumber);
-    else
-      command.concat(adminNumber);//="AT+CMGS=\"+917698439201\"";
-
+    command.concat(getActiveNumber());
     command.concat("\"");
 
-    //if (sendBlockingATCommand("AT+CMGS=\"+917698439201\""))
     if (sendBlockingATCommand(command))
     {
       sendCommand(responseString,true);

@@ -12,8 +12,14 @@ byte S_EEPROM::checkExists(String number)
 {
   if (numbersCount > 0)
   {
-    if (primaryNumber == number)
+    if(!alterNumberSetting)
     {
+      if (primaryNumber == number)
+        return 0;
+    }
+    else
+    {
+      if(alterNumber==number)
       return 0;
     }
 
@@ -24,14 +30,13 @@ byte S_EEPROM::checkExists(String number)
         return i + 1;
       }
     }
+
   }
   return 0xFF;
 }
 
-bool S_EEPROM::addNumber(String number, bool admin)
+bool S_EEPROM::addNumber(String number)
 {
-  if (number.length() == 10)
-  {
     if (numbersCount == 5)
       return false;
     else
@@ -48,14 +53,24 @@ bool S_EEPROM::addNumber(String number, bool admin)
         return true;
       }
     }
-  }
   return false;
 }
 
-bool S_EEPROM::removeNumber(String number, bool admin)
+bool S_EEPROM::addAlternateNumber(String number)
 {
-  if (number.length() == 10)
-  {
+    if(numbersCount>0)
+    {
+      alterNumber=number;
+      alterNumberPresent=true;
+      EEPROM.put(alterNumberPresentAddress, alterNumberPresent);
+      write_StringEE(alterNumberAddress,alterNumber);
+      return true;
+    }
+    return false;
+}
+
+bool S_EEPROM::removeNumber(String number)
+{
     if (numbersCount < 2)
       return false;
     else
@@ -73,7 +88,6 @@ bool S_EEPROM::removeNumber(String number, bool admin)
           return true;        
       }
     }
-  }
   return false;
 }
 
@@ -118,6 +132,7 @@ void S_EEPROM::clearLoadedNumbers()
   }
 }
 
+
 void S_EEPROM::saveForceStartSettings(bool temp)
 {
   FORCESTART=temp;
@@ -126,15 +141,41 @@ void S_EEPROM::saveForceStartSettings(bool temp)
 
 void S_EEPROM::loadForceStartSettings()
 {
-  FORCESTART=EEPROM.get(forceStartAddress,FORCESTART);
+  EEPROM.get(forceStartAddress,FORCESTART);
   if(FORCESTART==0xFF)
     saveForceStartSettings(true);
+}
+
+void S_EEPROM::saveAlterNumberSetting(bool temp)
+{
+  alterNumberSetting=temp;
+  EEPROM.put(alterNumberSettingAddress,alterNumberSetting);
+}
+
+void S_EEPROM::loadAlterNumberSetting()
+{
+  EEPROM.get(alterNumberSettingAddress,alterNumberSetting);
+  if(alterNumberSetting==0xFF)
+    saveAlterNumberSetting(false);
+}
+
+void S_EEPROM::loadAlterNumber()
+{
+  EEPROM.get(alterNumberPresentAddress, alterNumberPresent);
+  if(alterNumberPresent==(byte)true)
+  {
+    alterNumber = read_StringEE(alterNumberAddress, 11);
+  }
+  else if(alterNumberPresent==0xFF)
+    EEPROM.put(alterNumberPresentAddress,(byte)false);
 }
 
 void S_EEPROM::loadAllData()
 {
   loadForceStartSettings();
   loadNumbers();
+  loadAlterNumberSetting();
+  loadAlterNumber();
 }
 
 void S_EEPROM::clearNumbers(bool admin = false)

@@ -18,7 +18,8 @@ class S_EEPROM
     //void loadRPMSettings();
     void loadNumbers();
     void loadForceStartSettings();
-    
+    void loadAlterNumber();
+    void loadAlterNumberSetting();
     void clearLoadedNumbers();
 
     
@@ -38,15 +39,20 @@ class S_EEPROM
     byte FORCESTART;
     String primaryNumber;
     String secondary[4];
-
+    
+    String alterNumber;
+    byte alterNumberSetting;
+    byte alterNumberPresent;
 
     S_EEPROM();
     //void saveRPMSettings(unsigned short int);
     byte checkExists(String number);
     void saveForceStartSettings(bool);
+    void saveAlterNumberSetting(bool);
     void loadAllData();
-    bool addNumber(String number, bool admin=false);
-    bool removeNumber(String number, bool admin=false);
+    bool addNumber(String number);
+    bool addAlternateNumber(String number);
+    bool removeNumber(String number);
     void clearNumbers(bool admin);
 };
 #endif
