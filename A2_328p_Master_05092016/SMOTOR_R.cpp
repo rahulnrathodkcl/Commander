@@ -233,14 +233,15 @@ void SMOTOR_R::stopBackOff()
 
 void SMOTOR_R::backOff()
 {
+	operationPerformed=false;
 	currentOperation='B';
 	spi1->inform(I_MOTORBOFF);
 	digitalWrite(PIN_SLOW,HIGH);
 	digitalWrite(PIN_FAST,LOW);
 	backingOff=true;
 	fMotorOperated(true);
-}
 
+}
 bool SMOTOR_R::makeResponseElligible()
 {
 	if(operationPerformed)
