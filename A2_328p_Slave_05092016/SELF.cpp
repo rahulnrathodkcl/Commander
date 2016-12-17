@@ -130,7 +130,7 @@ void SELF::IVR_RPM()
   crise=currentrise;
   lrise=lastrise;
   interrupts();  
-  if (crise != 0 && lrise != 0 )
+  if (crise != 0 && lrise != 0 && crise!=lrise)
   {
     RPM = 60000.0 / (crise - lrise);
     tempRPM = RPM;
