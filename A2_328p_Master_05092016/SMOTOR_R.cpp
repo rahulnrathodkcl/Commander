@@ -1,5 +1,12 @@
 //#include "Defintions.h"
 
+
+//old motor settings : MOTOR LOW 65 MOTOR HIGH:348 
+// old motor works inverse i.e. achieves motor low when accelerator increases and motor high when accelerator decreases
+
+//new motor settings : MOTOR LOW 930 MOTOR HIGH 370
+//new motor works straight i.e. achieces motor low when accel dec and motor high when accel inc
+
 #include <Arduino.h>
 #include "SMOTOR_R.h"
 
@@ -194,12 +201,12 @@ bool SMOTOR_R::operateOnEvent()
 		byte r=eventByte;
 		if(backingOff)
 		{
-			if(currentOperation=='B' && (r==EVENT_MOTORPREVIOUSSTATE || r==EVENT_MOTORLOW))
+			if(currentOperation=='B' && (r==EVENT_MOTORPREVIOUSSTATE || r==EVENT_MOTORHIGH))
 				return true;
 		}
 		else if(operating)
 		{
-			if((r==EVENT_MOTORLOW && currentOperation=='I') || (r==EVENT_MOTORHIGH && (currentOperation=='D' || currentOperation=='S')))
+			if((r==EVENT_MOTORHIGH && currentOperation=='I') || (r==EVENT_MOTORLOW && (currentOperation=='D' || currentOperation=='S')))
 				return true;
 		}
 	}

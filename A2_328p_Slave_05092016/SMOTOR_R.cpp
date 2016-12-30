@@ -1,5 +1,11 @@
 #include "SMOTOR_R.h"
 
+//old motor settings : MOTOR LOW 65 MOTOR HIGH:348 
+// old motor works inverse i.e. achieves motor low when accelerator increases and motor high when accelerator decreases
+
+//new motor settings : MOTOR LOW 930 MOTOR HIGH 370
+//new motor works straight i.e. achieces motor low when accel dec and motor high when accel inc
+
 SMOTOR_R::SMOTOR_R()
 {
 	pinMode(PIN_SMOTORPWR,OUTPUT);
