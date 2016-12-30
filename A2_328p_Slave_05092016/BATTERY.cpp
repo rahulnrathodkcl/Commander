@@ -3,6 +3,8 @@
 BATTERY::BATTERY()
 {
 	pinMode(PIN_BATTERYPWR,OUTPUT);
+	digitalWrite(PIN_BATTERYPWR,LOW);
+	alarmTrigger=false;
 	alarmed=false;
 	gotQuery=false;
 	selfOn=false;
@@ -46,7 +48,10 @@ bool BATTERY::checkSufficientLevel()
 			if(batteryLevel<=2 || batteryLevel>80)
 				return false;
 			else if(batteryLevel>3 && alarmed==true)
+			{
 				alarmed=false;
+				alarmTrigger=false;
+			}
 	}
 	return true;
 }
@@ -92,10 +97,10 @@ void BATTERY::update()
 	if(gotQuery)
 		operateOnQuery();
 
-	if(millis()-lastCheck>180000L && !selfOn)
+	if((millis()-lastCheck>180000L) && !selfOn)
 		checkBatteryLevel();
 
-	if(alarmTrigger)
+	if(alarmTrigger && !alarmed)
 	{
 		if(spi1->sendData(EVENT_BATTERYLOW))
 		{
