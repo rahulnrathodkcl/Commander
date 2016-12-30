@@ -500,7 +500,7 @@ bool SIM::sendBlockingATCommand(String cmd)
 String SIM::readString()
 {
   String str = "";
-  if (_SSerial->available() > 0)
+  if (_SSerial->available() >  0)
   {
     acceptCommands();
     str = _SSerial->readStringUntil('\n');
@@ -738,19 +738,19 @@ void SIM::sendSMS(String msg="",bool predefMsg=false)
     command.concat(getActiveNumber());
     command.concat("\"");
 
-    if (sendBlockingATCommand(command))
-    {
-      sendCommand(responseString,true);
-      //_SSerial->println(responseString);    // message to send
-      _SSerial->write(0x1A);
-      //_NSerial->println(response_chk_ret_str());
-      //delay(500);
-      #ifndef disable_debug
+    _SSerial->flush();
+    sendCommand(command);
+    _SSerial->flush();
+    sendCommand(responseString,true);
+    _SSerial->flush();
+    _SSerial->write(0x1A);
+    _SSerial->flush();
+    #ifndef disable_debug
       _NSerial->println("SMS Done");
-      #endif
+    #endif
       //sendCommand("AT+CMGF=0\r");
       //_SSerial->print("AT+CMGF=0\r"); //Normal Mode
-    }
+    // }
     //_SSerial->println("AT+CMGS=\"+917698439201\""); // recipient's mobile number, in international format
   //}
   //_SSerial->println("AT+CMGF=1\r"); // AT command to send SMS message
