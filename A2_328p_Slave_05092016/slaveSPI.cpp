@@ -18,9 +18,6 @@ slaveSPI::slaveSPI(void (*startSequenceQuery)(),S_EEPROM *eeprom1)
 	waitTime=3;
 	sensorDataRequestWaitTime=10;
 
-
-	PCICR |= (1 <<PCIE0);
-	PCMSK0 |= (1<<PCINT2);
 	SPI.attachInterrupt();
 }
 

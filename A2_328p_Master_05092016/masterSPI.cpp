@@ -40,7 +40,10 @@ void masterSPI::anotherConstructor(bool *tempLimit,bool *smotorEventOccured, byt
 	pinMode(SLAVE_READY_INTERRUPT_PIN,INPUT);
   	pinMode(SS,OUTPUT);
   	digitalWrite(SS,HIGH);
- 	  	
+
+	PCICR |= (1 <<PCIE0);
+	PCMSK0 |= (1<<PCINT2);
+
   	SPI.begin();
   	SPI.beginTransaction(SPISettings(100000, MSBFIRST, SPI_MODE0));
 }
