@@ -14,44 +14,39 @@
 
 //#include <avr/sleep.h>
 
-//#define MaximumTemperature 55.0
-//#define MinimumMotorVoltage 0.30
-//#define MaximumMotorVoltage 1.70
-//#define TemperatureWaitTime 300 //x100 mS
-
-#ifdef use_diesel
-  #define SEN_DSL A1
-  #define PWR_DIESEL 27
-
-  #define MinimumDieselVoltage 0.28  //x1024/5.0 
-  #define MaximumDieselVoltage 1.68   //x1024/5.0
-  #define DieselSensitivty 0.10
-  #define DieselMachineOffVoltage 0.30
-  #define DieselReserveVoltage 0.45
-  #include "DSL.h"
-
-  void registerDieselLow()
-  {
-    ////Serial.println("Diesel in Reserve");
-    //sim1.registerEvent('L',true,true);
-    //lastImmediateEvent='L';
-  }
-  
-  void registerDieselRate()
-  {
-    //Serial.println("Diesel getting low very rapidly..");
-    //Serial.println("Diesel Rate increased...");
-    //sim1.registerEvent('R',true,false);
-  }
-  
-  void turnMachineOffDieselLow()
-  {
-      //Serial.println("Machine is turning Off Due to Very Low Diesel ");
-  }
-
-  DSL dsl1(SEN_DSL, PWR_DIESEL, MaximumDieselVoltage, MinimumDieselVoltage,DieselMachineOffVoltage,DieselReserveVoltage, DieselSensitivty, &Serial);
-
-#endif
+//#ifdef use_diesel
+//  #define SEN_DSL A1
+//  #define PWR_DIESEL 27
+//
+//  #define MinimumDieselVoltage 0.28  //x1024/5.0 
+//  #define MaximumDieselVoltage 1.68   //x1024/5.0
+//  #define DieselSensitivty 0.10
+//  #define DieselMachineOffVoltage 0.30
+//  #define DieselReserveVoltage 0.45
+//  #include "DSL.h"
+//
+//  void registerDieselLow()
+//  {
+//    ////Serial.println("Diesel in Reserve");
+//    //sim1.registerEvent('L',true,true);
+//    //lastImmediateEvent='L';
+//  }
+//  
+//  void registerDieselRate()
+//  {
+//    //Serial.println("Diesel getting low very rapidly..");
+//    //Serial.println("Diesel Rate increased...");
+//    //sim1.registerEvent('R',true,false);
+//  }
+//  
+//  void turnMachineOffDieselLow()
+//  {
+//      //Serial.println("Machine is turning Off Due to Very Low Diesel ");
+//  }
+//
+//  DSL dsl1(SEN_DSL, PWR_DIESEL, MaximumDieselVoltage, MinimumDieselVoltage,DieselMachineOffVoltage,DieselReserveVoltage, DieselSensitivty, &Serial);
+//
+//#endif
 
 void selfGotStarted();
 void selfGotStopped();
@@ -179,7 +174,7 @@ void selfGotStopped()
   //Serial.println("Got A Timer OverFLow Event..");
   
   //digitalWrite(LED, !digitalRead(LED));
-  //  TCNT3 = 0x48E4;       //initialize the counter
+  //  TCNT3 = 0x48E4;       //the counter
 }*/
 
 void FIVR_RPM()
@@ -227,17 +222,11 @@ void printNumbers()
 void setup() {
   // put your setup code here, to run once:
   
-  //Serial.begin(19200);
-  
-
   pinMode(PIN_SECLIMITSIG,INPUT);
   pinMode(PIN_SECLIMITPWR,OUTPUT);
   digitalWrite(PIN_SECLIMITPWR,LOW);
 
   eeprom1.loadAllData();
-  //eeprom1.saveTempSettings((unsigned short int)45);
-
-  //printNumbers();
 
   self1.setSPI(&spi1);
   smotor1.setSPI(&spi1);
@@ -252,8 +241,6 @@ void setup() {
   #else
     spi1.setObjectReference(&self1,&smotor1,&temp1);
   #endif
-  //spi1.setInformFunction(self1->informSelf,self1->informLimit,smotor1->inform);
-  //spi1.setQueryFunction(startSequenceQuery,temp1.query,smotor1.query,self1.limitQuery,self1.machineQuery);
 
   initialized = false;
 
@@ -278,29 +265,31 @@ void setup() {
 ISR (SPI_STC_vect)
 {
   spi1.receiveInterrupt();
-}  // end of interrupt routine SPI_STC_vect
+}
 
-
-unsigned long lastTime=0;
 void loop() {
 
-  if (!initialized && millis() >= 500)
+  if(!initialized)
   {
-    if(requestSensorReadings)
+    if (millis() >= 500)
     {
-      self1.triggerMachineStatus();
-      temp1.init();    
-      #ifdef CHK_BATTERY
-        batteryLevel.checkInitialBatteryLevel();
-      #endif
-      requestSensorReadings=false;    
+      if(requestSensorReadings)
+      {
+        self1.triggerMachineStatus();
+        temp1.init();    
+        #ifdef CHK_BATTERY
+          batteryLevel.checkInitialBatteryLevel();
+        #endif
+        requestSensorReadings=false;    
+      }
+      if(millis()>2500)
+      {
+        temp1.init();
+        initialized = true;
+        spi1.sendData(A_SLAVEEXISTS);
+      }
     }
-    if(millis()>2500)
-    {
-      temp1.init();
-      initialized = true;
-    }
-    return;
+  return;
   }
 
   if(securityCheckElligible())
@@ -323,7 +312,6 @@ void loop() {
           securityAlarmed=spi1.sendData(EVENT_SECURITY);
           if(securityAlarmed)
             securityCnt=0;
-          //securityAlarmed=true;
         }
       }
     }
