@@ -124,7 +124,7 @@ void SELF::reportEvent(byte event)
 
 void SELF::IVR_RPM()
 {
-  double tempRPM = 0;
+  double tempRPM = 0,lastRPM=0;
   double crise,lrise;
   noInterrupts();
   crise=currentrise;
@@ -132,7 +132,13 @@ void SELF::IVR_RPM()
   interrupts();  
   if (crise != 0 && lrise != 0 && crise!=lrise)
   {
+    lastRPM=RPM;
     RPM = 60000.0 / (crise - lrise);
+    if(selfOn)
+    {
+      if(RPM-lastRPM>100)
+        RPM=lastRPM;
+    }
     tempRPM = RPM;
     
     if(didCompress)
