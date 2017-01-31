@@ -44,6 +44,9 @@ class SELF
 	bool selfOn;
 	unsigned long tempSignalTime;
 
+	unsigned long tempSelfTime;
+	int selfTime;
+
 	byte startCnt;
 
 	void (*sendMotorStatus)(bool);

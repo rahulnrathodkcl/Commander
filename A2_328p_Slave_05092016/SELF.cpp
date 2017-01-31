@@ -42,6 +42,7 @@ SELF::SELF(void (*sMotorStatus)(bool),void (*funcSelfStart)(),void (*funSelfStop
 
   compSwitchChangedOffTime = 9; //x100
   decompSwitchChangedOffTime = 1; //x100
+  selfTime=1500;
 
   gotLimitQuery=false;
   gotMachineQuery=false;
@@ -124,7 +125,7 @@ void SELF::reportEvent(byte event)
 
 void SELF::IVR_RPM()
 {
-  double tempRPM = 0,lastRPM=0;
+  double tempRPM = 0;//,lastRPM=0;
   double crise,lrise;
   noInterrupts();
   crise=currentrise;
@@ -132,13 +133,18 @@ void SELF::IVR_RPM()
   interrupts();  
   if (crise != 0 && lrise != 0 && crise!=lrise)
   {
-    lastRPM=RPM;
+    //lastRPM=RPM;
     RPM = 60000.0 / (crise - lrise);
     if(selfOn)
     {
-      if(RPM-lastRPM>100)
-        RPM=lastRPM;
+      if(millis() - tempSelfTime<selfTime)
+        return;
     }
+    // if(selfOn)
+    // {
+      // if(RPM-lastRPM>100)
+        // RPM=lastRPM;
+    // }
     tempRPM = RPM;
     
     if(didCompress)
@@ -238,6 +244,7 @@ void SELF::decompress()
 void SELF::selfStarted()
 {
   selfOn=true;
+  tempSelfTime=millis();
   startingSelf();
 }
 
