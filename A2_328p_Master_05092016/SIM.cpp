@@ -85,7 +85,7 @@ void SIM::anotherConstructor(byte SLEEPPIN)
 
   callCutWaitTime = 580;
   nr = 0;
-  responseSetting = 'A';
+  responseSetting = 'C';
   currentStatus = 'N';
   currentCallStatus = 'N';
   //gotSettingTone = false;
@@ -845,7 +845,7 @@ void SIM::operateDTMF(String str)
           starPresent=true;
           DTMFCommandPresent=1;
           callCutWait=millis();
-          stopSound();
+          //stopSound();
           f3(true);
       }
       else if (str == "2") //MACHINE START
@@ -854,7 +854,7 @@ void SIM::operateDTMF(String str)
           starPresent=true;
           DTMFCommandPresent=2;
           callCutWait=millis();
-          stopSound();
+          //stopSound();
           f4(true);
       }
   }
@@ -865,9 +865,6 @@ void SIM::operateRing()
   nr++;
   if (nr <= 2)
   {
-
-    if(nr==1)
-      sendCommand("AT+DDET=1\r\n");
     
     String str;
     do
@@ -876,9 +873,16 @@ void SIM::operateRing()
     }
     while (isNumber(str) == false);
     
+    if(nr==1)
+    {
+      sendCommand("AT+DDET=1\r\n");
+      _SSerial->flush();
+    }
+
+
     if(str.length()>=10 && isNumeric(str))
     {
-      if (!checkNumber(str))
+      if (nr>1 && !checkNumber(str))
       {
         endCall();
       }
