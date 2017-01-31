@@ -91,7 +91,7 @@ void SMOTOR_R::triggerIncreaseRPM(byte steps)
 
 void SMOTOR_R::increaseRPM()
 {
-	if(spiData!=A_MOTORLOW)
+	if(spiData!=A_MOTORHIGH)
 	{
 		if(operating || selfOperating)
 		{
@@ -123,7 +123,7 @@ void SMOTOR_R::setSPI(masterSPI *spi1)
 
 void SMOTOR_R::decreaseRPM()
 {	
-	if(spiData!=A_MOTORHIGH)
+	if(spiData!=A_MOTORLOW)
 	{	
 		if(operating || selfOperating)
 		{
@@ -150,7 +150,7 @@ void SMOTOR_R::decreaseRPM()
 
 void SMOTOR_R::switchOff()
 {
-	if(spiData!=A_MOTORHIGH)
+	if(spiData!=A_MOTORLOW)
 	{
 		if(operating || selfOperating)
 		{
