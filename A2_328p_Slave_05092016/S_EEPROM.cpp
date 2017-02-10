@@ -149,9 +149,9 @@ void S_EEPROM::loadMotorSettings()
   EEPROM.get(motorLowAddress,MOTORLOW);
   EEPROM.get(motorHighAddress,MOTORHIGH);
   if(MOTORLOW==0xFFFF)
-    saveMotorLowSettings(65);
+    saveMotorLowSettings(50);
   if(MOTORHIGH==0xFFFF)
-    saveMotorHighSettings(348);
+    saveMotorHighSettings(400);
 }
 
 void S_EEPROM::loadNumbers()

@@ -6,6 +6,8 @@
 //new motor settings : MOTOR LOW 930 MOTOR HIGH 370
 //new motor works straight i.e. achieces motor low when accel dec and motor high when accel inc
 
+//new motor with resistor changed : when motor is full out , that is accel is decreased, voltage decrease to 50
+//									when motor is full in, that is accel is inc, voltage inc to 400
 SMOTOR_R::SMOTOR_R()
 {
 	pinMode(PIN_SMOTORPWR,OUTPUT);
@@ -152,7 +154,7 @@ byte SMOTOR_R::checkLimit()
 	{
 		if(operating && backingOff)
 		{
-			if(temp<=lastMotorPos)
+			if(temp>=lastMotorPos)
 				return A_MOTORPREVIOUSSTATE;
 		}
 		return A_MOTORNORMAL;
