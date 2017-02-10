@@ -112,7 +112,7 @@ class SIM
     bool playSoundElligible();
     void triggerPlaySound();
     void playSoundAgain(String);
-    void playSound(char c,bool x=false);
+    void playSound(char c,bool x=false,bool newAction=true);
     void stopSound();
     bool callTimerExpire();
     bool responseActionElligible();

@@ -865,6 +865,12 @@ void SIM::operateRing()
   nr++;
   if (nr <= 2)
   {
+
+    if(nr==1)
+    {
+      sendCommand("AT+DDET=1\r\n");
+      _SSerial->flush();
+    }
     
     String str;
     do
@@ -873,12 +879,7 @@ void SIM::operateRing()
     }
     while (isNumber(str) == false);
     
-    if(nr==1)
-    {
-      sendCommand("AT+DDET=1\r\n");
-      _SSerial->flush();
-    }
-
+    callCutWait=millis();
 
     if(str.length()>=10 && isNumeric(str))
     {
@@ -964,7 +965,7 @@ void SIM::playSoundAgain(String str)
             playFile=actionType;
         }
       }
-      playSound(playFile);
+      playSound(playFile,false,false);
     }
     else
     {
@@ -973,12 +974,13 @@ void SIM::playSoundAgain(String str)
   }
 }
 
-void SIM::playSound(char actionType,bool init)
+void SIM::playSound(char actionType,bool init,bool newAction)
 {
   _SSerial->flush();
   soundWait = millis();
   bplaySound = true;
-  this->actionType=actionType;
+  if(newAction)
+    this->actionType=actionType;
   playFile = actionType;
     if(init)
       soundPlayedNumber=0;
@@ -1220,17 +1222,17 @@ void SIM::update()
       str=readString();
     }
     
-    if(isRinging(str))
-    {
+//    if(isRinging(str))
+//    {
 //      #ifndef disable_debug
 //      _NSerial->print("currentStatus:");
 //      _NSerial->println(currentStatus);
 //      _NSerial->print("currentCallStatus:");
 //      _NSerial->println(currentCallStatus);
 //      #endif
-    }
-    else
-    {
+//    }
+//    else
+//    {
       if(isNewMsg(str))
       {
           sendReadMsg(str);
@@ -1241,7 +1243,7 @@ void SIM::update()
       }
       else
         checkNetwork(str);
-    }
+//    }
 
     if (!freezeIncomingCalls &&  (currentStatus == 'N' || currentStatus == 'R') && (currentCallStatus == 'N' || currentCallStatus == 'I')) //Ringing Incoming Call
     {
