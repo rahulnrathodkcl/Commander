@@ -292,53 +292,54 @@ void loop() {
   return;
   }
 
-  if(securityCheckElligible())
+  if(eeprom1.gotMasterQuery)
   {
-      triggerSecurityCheck();
-  }
-  if(securityLimitReadingElligible())
-  {
-    //Serial.println(analogRead(PIN_SECLIMITSIG));
-    if(digitalRead(PIN_SECLIMITSIG)==HIGH)
+    if(securityCheckElligible())
     {
-      if(!securityAlarmed)
-      { 
-        if(securityCnt<2)
-        {
-            securityCnt++;
-        }
-        else
-        {
-          securityAlarmed=spi1.sendData(EVENT_SECURITY);
-          if(securityAlarmed)
-            securityCnt=0;
+        triggerSecurityCheck();
+    }
+    if(securityLimitReadingElligible())
+    {
+      //Serial.println(analogRead(PIN_SECLIMITSIG));
+      if(digitalRead(PIN_SECLIMITSIG)==HIGH)
+      {
+        if(!securityAlarmed)
+        { 
+          if(securityCnt<2)
+              securityCnt++;
+          else
+          {
+            securityAlarmed=spi1.sendData(EVENT_SECURITY);
+            if(securityAlarmed)
+              securityCnt=0;
+          }
         }
       }
+      else
+          securityAlarmed=false;
+      
+      stopSecurityCheck();
     }
-    else
+    
+    if(gotQuery)
+      operateOnQuery();
+    
+    if(waitingForStatus && gotMotorStatus)
     {
-        securityAlarmed=false;
+       sendResponseAsPerMotorState();
+       gotMotorStatus=false;
+       waitingForStatus=false;
     } 
-    stopSecurityCheck();
-  }
-  
-  if(gotQuery)
-    operateOnQuery();
-  
-  if(waitingForStatus && gotMotorStatus)
-  {
-     sendResponseAsPerMotorState();
-     gotMotorStatus=false;
-     waitingForStatus=false;
-  } 
 
-  self1.update();
-  smotor1.update();
-  temp1.update();
+    self1.update();
+    smotor1.update();
+    temp1.update();
+    #ifdef CHK_BATTERY
+      batteryLevel.update();
+    #endif     
+  }
+
   spi1.update();
-  #ifdef CHK_BATTERY
-    batteryLevel.update();
-  #endif 
 
   /*if(millis()-lastTime>5000)
   {

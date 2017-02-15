@@ -39,6 +39,7 @@ void S_EEPROM::saveTempSettings(unsigned short int temp)
 S_EEPROM::S_EEPROM()
 {
   numbersCount = 0;
+  gotMasterQuery=false;
 }
 
 byte S_EEPROM::checkExists(String number)
@@ -130,7 +131,7 @@ void S_EEPROM::loadRPMSettings()
   EEPROM.get(decompRPMAddress,DECOMPRPM);
 
   if (RPM == 0xFFFF)
-    saveHighRPMSettings(700);
+    saveHighRPMSettings(410);
   if(COMPRPM==0xFFFF)
     saveCompRPMSettings(160);
   if(DECOMPRPM==0xFFFF)

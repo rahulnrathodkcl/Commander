@@ -27,7 +27,8 @@ class S_EEPROM
   public:
     byte numbersCount;
     bool machineOn;
-
+    bool gotMasterQuery;
+    
     unsigned short int RPM;
     unsigned short int COMPRPM;
     unsigned short int DECOMPRPM;
