@@ -101,6 +101,7 @@ void SMOTOR_R::increaseRPM()
 			returnCommandStatus(false);
 			return;
 		}
+		operationPerformed=false;
 		currentOperation='I';
 		spi1->inform(I_MOTORRPON);
 		fMotorOperated(true);
@@ -133,6 +134,7 @@ void SMOTOR_R::decreaseRPM()
 			returnCommandStatus(false);
 			return;
 		}
+		operationPerformed=false;
 		currentOperation='D';
 		spi1->inform(I_MOTORRPON);
 		fMotorOperated(true);
@@ -160,6 +162,7 @@ void SMOTOR_R::switchOff()
 			returnCommandStatus(false);
 			return;
 		}
+		operationPerformed=false;
 		currentOperation='S';
 		spi1->inform(I_MOTORSWOFF);
 		fMotorOperated(true);
@@ -254,7 +257,7 @@ void SMOTOR_R::backOff()
 }
 bool SMOTOR_R::makeResponseElligible()
 {
-	if(operationPerformed)
+	if(operationPerformed==true)
 	{
 		if(currentOperation=='S')
 		{
@@ -263,6 +266,7 @@ bool SMOTOR_R::makeResponseElligible()
 		else
 			return ((millis()-wait)>=(waitTime*100));	
 	}
+	return false;
 }
 
 void SMOTOR_R::makeResponse()
@@ -279,7 +283,6 @@ void SMOTOR_R::makeResponse()
 	{
 		fMachineNotSwitchedOff();
 	}
-
 	operationPerformed=false;
 }
 

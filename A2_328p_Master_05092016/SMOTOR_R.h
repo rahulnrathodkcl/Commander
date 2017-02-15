@@ -32,8 +32,8 @@ class SMOTOR_R
 
 	void (*finc)();
 	void (*fdec)();
-	void (*fMotorOperated)(bool);
 	void (*fMachineNotSwitchedOff)();
+	void (*fMotorOperated)(bool);
 	void (*returnCommandStatus)(bool);
 	
 	bool queryMotorState();
