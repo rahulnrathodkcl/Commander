@@ -71,7 +71,7 @@ byte BATTERY::getBatteryLevel()
 	digitalWrite(PIN_BATTERYPWR,LOW);
 	temp=temp*5.0/1024.0;
 	temp=temp*4.030;
-	temp=temp-11.5;
+	temp=temp-11.20;
 
 	temp=temp*10;
 	lastCheck=millis();

@@ -1,7 +1,7 @@
 #ifndef DEF_h
 #define DEF_h
 
-#define CHK_BATTERY
+//#define CHK_BATTERY
 // SELF
 
 #define LIMITREADINGTIME 25
@@ -119,6 +119,7 @@
 	#define CHKINCOMING_ANSWER 0x09
 
 	// only for slave
+	#define CHKREQUEST_SENSOR 0x02
 	#define CHKINCOMING_SETTING 0x07
 	#define CHKINCOMING_QUERY 0x06
 	#define CHKINFORM_SELF 0x03

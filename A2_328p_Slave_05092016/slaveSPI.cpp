@@ -105,8 +105,7 @@ void slaveSPI::operateOnSPIData()
 	byte temp=spiData >> 4;
 	switch(temp)
 	{
-		case ASK_RPM:
-		case ASK_TEMP:
+		case CHKREQUEST_SENSOR:
 			operateOnSensorDataRequest();
 			return;
 		break;
@@ -131,11 +130,11 @@ void slaveSPI::operateOnSPIData()
 				case Q_SLAVEEXISTENCE:
 					slaveExistenceQuery=true;
 					break;
+				#ifdef CHK_BATTERY
 				case Q_BATTERY:
 					batteryLevel->query();
 					break;
-				//#ifdef CHK_BATTERY
-				//#endif
+				#endif
 			}
 		break;
 		case CHKINFORM_SELF:
@@ -225,6 +224,7 @@ void slaveSPI::update()
 	if(slaveExistenceQuery)
 	{
 		slaveExistenceQuery=false;
+		eeprom1->gotMasterQuery=true;
 		// _Serial->println("Got Master Init Query..");
 		sendData(A_SLAVEEXISTS);
 	}
