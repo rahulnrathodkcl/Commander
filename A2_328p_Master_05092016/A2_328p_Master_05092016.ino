@@ -61,7 +61,7 @@ bool gotCannotTurnOffMachineEvent=false;
 bool gotRPMIncreasedEvent=false;
 bool gotSwitchedOffEvent=false;
 bool gotStartedEvent=false;
-
+bool simDebugMode=false;
 
 void registerRPMIncreased();
 void registerRPMDecreased();
@@ -81,12 +81,14 @@ S_EEPROM eeprom1;
     SMOTOR_R smotor1(&Serial,registerRPMIncreased, registerRPMDecreased,speedMotorOperated,cannotTurnOffMachine,motorCommandStatus);
     masterSPI masterSPI1(&Serial,&tempLimitReached,&smotor1.eventOccured,&smotor1.eventByte,&self1.eventOccured,&self1.eventByte,&batteryLow,&securityAlarmed);
     HardwareSerial* USART1=&Serial;
+    SoftwareSerial* simSerial=&s1;
   #else
     SIM sim1(&s1,&Serial,PIN_SIMSLEEP);
     SELF self1(&s1);
     SMOTOR_R smotor1(&s1,registerRPMIncreased, registerRPMDecreased,speedMotorOperated,cannotTurnOffMachine,motorCommandStatus);
     masterSPI masterSPI1(&s1,&tempLimitReached,&smotor1.eventOccured,&smotor1.eventByte,&self1.eventOccured,&self1.eventByte,&batteryLow,&securityAlarmed);
     SoftwareSerial* USART1=&s1;
+    HardwareSerial* simSerial=&Serial;
   #endif
 #else
   SIM sim1(&Serial,PIN_SIMSLEEP);
@@ -473,20 +475,38 @@ void loop() {
   if(batteryLow)
     batteryLevelLow();
 
-  #ifndef disable_debug 
+  #ifndef disable_debug
+  if(simDebugMode)
+  {
+      if(simSerial->available()>0)
+        USART1->print(simSerial->readString());
+  }
+
   if (USART1->available() > 0)
   {
     str = USART1->readStringUntil('\n');
-    if (str == "S\r")
-      triggerStartMachine();
-    else if (str == "I\r")
-      triggerIncreaseRPM(1);
-    else if (str == "D\r")
-      triggerDecreaseRPM(1);
-    else if (str == "A\r")
-      triggerStopMachine();
+    if(simDebugMode)
+    {
+      if(str == "SIMDEBUGOFF\r")
+        simDebugMode=false;
+      else
+        simSerial->println(str);
+    }
     else
-      sim1.operateOnMsg(str,false);
+    {
+      if (str == "S\r")
+        triggerStartMachine();
+      else if (str == "I\r")
+        triggerIncreaseRPM(1);
+      else if (str == "D\r")
+        triggerDecreaseRPM(1);
+      else if (str == "A\r")
+        triggerStopMachine();
+      else if(str == "SIMDEBUGON\r")
+        simDebugMode=true;
+      else
+        sim1.operateOnMsg(str,false);
+    }
   }
   #endif
   
