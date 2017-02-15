@@ -125,7 +125,7 @@ void SELF::reportEvent(byte event)
 
 void SELF::IVR_RPM()
 {
-  double tempRPM = 0;//,lastRPM=0;
+  unsigned short int tempRPM = 0;//,lastRPM=0;
   double crise,lrise;
   noInterrupts();
   crise=currentrise;
@@ -170,22 +170,6 @@ void SELF::IVR_RPM()
         firedRPMEvent=false;
     }    
 
-    if(!firedRPMEvent && machineOn)
-    {
-        if(tempRPM>(eeprom1->RPM))
-        {
-          if(HRPMCnt<250)
-            HRPMCnt++;
-          else
-          {
-            firedRPMEvent=true;
-            reportEvent(EVENT_HIGHRPM);
-            HRPMCnt=0;
-          }
-        }
-        else
-          HRPMCnt=0;
-    }
     
     if (getMachineStatus()) //machine Is ON
     {
@@ -193,6 +177,23 @@ void SELF::IVR_RPM()
         {
           reportedDECOMPRPM=true;
           reportEvent(EVENT_DECOMPRPM);
+        }
+
+        if(!firedRPMEvent)
+        {
+          if(tempRPM>(eeprom1->RPM))
+          {
+              if(HRPMCnt<250)
+                HRPMCnt++;
+              else
+              {
+                firedRPMEvent=true;
+                reportEvent(EVENT_HIGHRPM);
+                HRPMCnt=0;
+              }
+          }
+          else
+            HRPMCnt=0;
         }
     }
     else
