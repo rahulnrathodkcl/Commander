@@ -93,6 +93,8 @@ void SIM::anotherConstructor(byte SLEEPPIN)
   immediateEvent=false;
   sendImmediateResponse=false;
   freezeIncomingCalls=false;
+  
+  sendCSQResponse=false;
 
   obtainNewEvent=true;
 }
@@ -135,7 +137,6 @@ void SIM::operateOnMsg(String str,bool admin=false)
     {
       //if(eeprom1->machineOn)
       //  return;
-
       bool send=false;
       if(stringContains(str,"TEMP",4,str.length()-1))
       {
@@ -188,7 +189,7 @@ void SIM::operateOnMsg(String str,bool admin=false)
             send=true;
           }
       }      
-      else if(stringContains(str,"HRPM",3,str.length()-1))
+      else if(stringContains(str,"HRPM",4,str.length()-1))
       {
           if(isNumeric(str))
           {
@@ -219,22 +220,29 @@ void SIM::operateOnMsg(String str,bool admin=false)
       }
       else if(stringContains(str,"AT+CSQ",6,str.length()-1))
       {
+        // unsigned long int temp=millis();
+        // String str;
         sendCommand("AT+CSQ",true);
-        unsigned long int temp=millis();
-        String str;
-        while(millis()-temp>1500)
-        { 
-          str=readString();
-          str.trim();
-          if(isCSQ(str))
-          {
-            sendSMS(str,true);
-          }
-        }
+        sendCSQResponse=true;
       }
+        // while(millis()-temp>1500)
+        // { 
+          // str=readString();
+          // if(isCSQ(str))
+          // {
+            // sendSMS(str,true);
+          // }
+        // }
       
       if(send)
       {
+        #ifndef disable_debug
+          _NSerial->print("Send");
+          _NSerial->print("  ");
+          _NSerial->print(lastSettingByte);
+          _NSerial->print("  ");
+          _NSerial->println(data);          
+        #endif
         sendAgain=!spi1->sendSettings(lastSettingByte,data);
         return;
       }
@@ -287,8 +295,8 @@ void SIM::operateOnMsg(String str,bool admin=false)
 
 bool SIM::isCSQ(String str)
 {
-  str.trim();
-  return(str.startsWith("+CSQ"));
+  return stringContains(str, "+CSQ", 4, 5);
+  //return(str.startsWith("+CSQ"));
 }
 
 void SIM::sendReadMsg(String str)
@@ -736,15 +744,30 @@ void SIM::sendSMS(String msg="",bool predefMsg=false)
     String command;
     command="AT+CMGS=\"+91";
     command.concat(getActiveNumber());
-    command.concat("\"");
+    command.concat("\"\r\n");
 
     _SSerial->flush();
     sendCommand(command);
     _SSerial->flush();
+    unsigned long int temp=millis();
+    while(millis()-temp<1000)
+    {}
     sendCommand(responseString,true);
     _SSerial->flush();
-    _SSerial->write(0x1A);
+    temp=millis();
+    while(millis()-temp<1000)
+    {}
     _SSerial->flush();
+    sendCommand((char)26,true);
+    //_SSerial->write(0x1A);
+    _SSerial->flush();
+    temp=millis();
+    while(millis()-temp<500)
+    {}
+    //_SSerial.println((char)26);// ASCII code of CTRL+Z
+    // _SSerial->write(0x1A);
+    // _SSerial->write(0x0D);
+    // _SSerial->write(0x0A);
     #ifndef disable_debug
       _NSerial->println("SMS Done");
     #endif
@@ -797,6 +820,7 @@ void SIM::operateDTMF(String str)
         {
           starPresent=false;
           DTMFCommandPresent=0;
+          responseToAction=false;
           callCutWait=millis();
           playSound('M',true);
           return;
@@ -1166,9 +1190,15 @@ void SIM::sendSettingsAgain()
 void SIM::operateOnRPMSensorData()
 {
   rpmSensorDataReceived=false;
-  String str="RPM:";
-  String str2=String(rpmSensorData);
-  str.concat(str2);
+  String str;
+  if(rpmSensorData>0)
+  {
+    str="RPM:";
+    String str2=String(rpmSensorData);
+    str.concat(str2);
+  }
+  else
+    str="MACHINE OFF";
   sendSMS(str,true);
 }
 
@@ -1233,7 +1263,12 @@ void SIM::update()
 //    }
 //    else
 //    {
-      if(isNewMsg(str))
+      if(isCSQ(str) && sendCSQResponse)
+      {
+        sendCSQResponse=false;
+        sendSMS(str,true);
+      }
+      else if(isNewMsg(str))
       {
           sendReadMsg(str);
       }

@@ -60,6 +60,8 @@ class SIM
     bool checkSelfStatus;
     char selfStatus;
 
+    bool sendCSQResponse;
+
     bool obtainNewEvent;
     unsigned long obtainEventTimer;
 
